@@ -1,3 +1,7 @@
+import logging
+import os
+
+import h5py
 import torch
 import torch.nn as nn
 import pandas as pd
@@ -6,12 +10,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from model.LSTM import LSTM
 from model.GRU import GRU
+from model.GCN import  GCN
 from torch.utils.tensorboard import SummaryWriter
 import time
 from test import ModelTester
 from data.Xian.dataset import LoadData
 from torch.utils.data import DataLoader
-
+from utils.utils import Evaluation
 
 # # 加载数据
 # data = pd.read_csv('./data/Xian/Xian.csv')
@@ -43,8 +48,10 @@ def main():
                           divide_days=[47, 14],
                           time_interval=1, history_length=1,
                           train_mode="train")
-
-    train_loader = DataLoader(train_data, batch_size=64, shuffle=True, num_workers=0, drop_last=True)
+    # print(len(train_data))
+    # print(train_data[0]["graph"])
+    # print(train_data[0]["graph"].shape)
+    train_loader = DataLoader(train_data, batch_size=64, shuffle=False, num_workers=0)
 
     test_data = LoadData(data_path=["data/Xian/adjacency_matrix_xian.csv", "data/Xian/Xian.npz"], num_nodes=64,
                          divide_days=[47, 14],
@@ -55,12 +62,12 @@ def main():
 
     # 定义超参数
     input_size = 1
-    hidden_size = 32
-    num_layers = 2
+    hidden_size = 64
+    num_layers = 4
     output_size = 1
-    num_epochs = 1000
-    learning_rate = 0.01
-    model = 'LSTM'  # LSTM、GRU、GCN、
+    num_epochs = 20
+    learning_rate = 0.001
+    model = 'GCN'  # LSTM、GRU、GCN、
 
     # 创建模型实例
     if model == 'LSTM':
@@ -69,6 +76,10 @@ def main():
     elif model == 'GRU':
         model_name = model
         model = GRU(input_size, hidden_size, num_layers, output_size).to(device)
+    elif model == 'GCN':
+        model_name = model
+        model = GCN(input_size, hidden_size, output_size).to(device)
+    print('当前模型：' + model_name)
 
     # 定义损失函数和优化器
     criterion = nn.MSELoss().to(device)
@@ -90,9 +101,15 @@ def main():
             count += 1
 
             # outputs = model(data['flow_x'].to(device))
-            outputs = model(data).to(device)
+            outputs = model(data)
 
-            loss = criterion(outputs, data['flow_y'].to(device))
+            # LSTM\GRU 和 GCN 不同
+            # train_y = data['flow_y'].view(data['flow_y'].size(0)*data['flow_y'].size(1), 1)   # [4096,1]
+            train_y = data['flow_y']  # [64,64,1,1]
+            print(train_y.shape)
+
+            # loss = criterion(outputs, data['flow_y'].to(device))
+            loss = criterion(outputs, train_y.to(device))
             epoch_loss += loss.item()  # 这里是把一个epoch的损失都加起来，最后再除训练数据长度，用平均loss来表示
 
             optimizer.zero_grad()
@@ -119,7 +136,7 @@ def main():
     # # test_data = test_data.to(device)
     # tester = ModelTester(model, criterion, model_name)
     # # 在测试集上进行测试
-    # tester.test(test_data)
+    # tester.test(test_loader)
 
 
 if __name__ == '__main__':

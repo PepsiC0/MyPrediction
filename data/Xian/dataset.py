@@ -12,8 +12,8 @@ def get_adjacent_matrix(distance_file: str) -> np.array:
 
     # 提取邻接矩阵数据
     A = data.values
-    print(A)
-    print(A.shape)
+    # print(A)
+    # print(A.shape)
 
     return A
 
@@ -168,10 +168,11 @@ class LoadData(Dataset):  # 这个就是把读入的数据处理成模型需要�
 if __name__ == '__main__':
     test_data = LoadData(data_path=["adjacency_matrix_xian.csv", "Xian.npz"], num_nodes=64, divide_days=[47, 14],
                           time_interval=1, history_length=1,
-                          train_mode="test")
+                          train_mode="train")
 
     print(len(test_data))
-    print(test_data[0]["flow_x"])
-    print(test_data[0]["flow_y"])
-    print(test_data[0]["flow_x"].size())
-    print(test_data[0]["flow_y"].size())
+    print(test_data[0]["graph"])
+    print(test_data[0]["graph"].shape)
+    # print(test_data[0]["flow_y"])
+    # print(test_data[0]["flow_x"].size())
+    # print(test_data[0]["flow_y"].size())
