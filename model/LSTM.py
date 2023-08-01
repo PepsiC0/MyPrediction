@@ -20,14 +20,15 @@ class LSTM(nn.Module):
     def forward(self, x):
         # train_loader
         flow_x = x["flow_x"].to(device)  # [B, N, H, D]  流量数据
-        flow_x = flow_x.view(flow_x.size(0), flow_x.size(1), flow_x.size(-1))
+        # print(flow_x.shape)
+        flow_x = flow_x.view(flow_x.size(0), flow_x.size(1), -1)
         x, _ = self.lstm(flow_x)
         # print(x.shape)
         s, b, h = x.shape
         x = x.reshape(s * b, h)  # 转换成线性层的输入格式
         # x = x.reshape(s, b, -1)
         out = self.fc(x)
-        print(out.shape)
+        # print(out.shape)
         # train_data
         # x, _ = self.lstm(x)  # (seq, batch, hidden) [N,H,D]---[64,1,1]
         # s, b, h = x.shape

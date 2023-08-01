@@ -6,28 +6,51 @@ import numpy as np
 from torch.utils.data import Dataset
 
 
-def get_adjacent_matrix(distance_file: str) -> np.array:
+def get_adjacent_matrix(distance_file: str, num_nodes, data_name, graph_type='connect') -> np.array:
     # 读取邻接矩阵文件
-    data = pd.read_csv(distance_file, index_col=0)
+    A = np.zeros([int(num_nodes), int(num_nodes)])
+    if data_name == 'Xian':
+        data = pd.read_csv(distance_file, index_col=0)
+        # 提取邻接矩阵数据
+        A = data.values
+    elif data_name == 'PEMSO4':
+        num_nodes = num_nodes
+        # A = np.zeros([int(num_nodes), int(num_nodes)])  # 构造全0的邻接矩阵
+        with open(distance_file, "r") as f_d:
+            f_d.readline()  # 表头，跳过第一行.
+            reader = csv.reader(f_d)  # 读取.csv文件.
+            for item in reader:  # 将一行给item组成列表
+                if len(item) != 3:  # 长度应为3，不为3则数据有问题，跳过
+                    continue
+                i, j, distance = int(item[0]), int(item[1]), float(item[2])
 
-    # 提取邻接矩阵数据
-    A = data.values
-    # print(A)
-    # print(A.shape)
-
+                if graph_type == "connect":  # 这个就是将两个节点的权重都设为1，也就相当于不要权重
+                    A[i, j], A[j, i] = 1., 1.
+                elif graph_type == "distance":  # 这个是有权重，下面是权重计算方法
+                    A[i, j] = 1. / distance
+                    A[j, i] = 1. / distance
+                else:
+                    raise ValueError("graph type is not correct (connect or distance)")
+        return A
     return A
 
 
-def get_flow_data(flow_file: str) -> np.array:
+def get_flow_data(flow_file: str, data_name) -> np.array:
     data = np.load(flow_file)
 
-    flow_data = data['arr_0'][:, :, 0][:, :, np.newaxis]  # [64, 1464, 1]
+    # Xian
+    if data_name == 'Xian':
+        flow_data = data['arr_0'][:, :, 0][:, :, np.newaxis]  # [64, 1464, 1]
+    # PEMS04
+    elif data_name == 'PEMS04':
+        flow_data = data['data'].transpose([1, 0, 2])[:, :, 0][:, :,
+                    np.newaxis]  # [N, T, D],transpose就是转置，让节点纬度在第0位，N为节点数，T为时间，D为节点特征
 
     return flow_data
 
 
 class LoadData(Dataset):  # 这个就是把读入的数据处理成模型需要的训练数据和测试数据，一个一个样本能读取出来
-    def __init__(self, data_path, num_nodes, divide_days, time_interval, history_length, train_mode):
+    def __init__(self, data_path, num_nodes, divide_days, time_interval, history_length, train_mode, data_name):
         self.data_path = data_path
         self.num_nodes = num_nodes
         self.train_mode = train_mode
@@ -35,12 +58,16 @@ class LoadData(Dataset):  # 这个就是把读入的数据处理成模型需要�
         self.test_days = divide_days[1]  # 7 * 2 = 14, test_data
         self.history_length = history_length  # 60/60 = 1
         self.time_interval = time_interval  # 1 hour
+        self.data_name = data_name
 
-        self.one_day_length = int(24 / self.time_interval)  # 一整天的数据量
+        if data_name == 'Xian':
+            self.one_day_length = int(24 / self.time_interval)  # 一整天的数据量
+        elif data_name == 'PEMS04':
+            self.one_day_length = int(24 * 60 / self.time_interval)  # 一整天的数据量
 
-        self.graph = get_adjacent_matrix(distance_file=data_path[0])
+        self.graph = get_adjacent_matrix(distance_file=data_path[0], num_nodes=num_nodes, data_name=data_name)
 
-        self.flow_norm, self.flow_data = self.pre_process_data(data=get_flow_data(data_path[1]),
+        self.flow_norm, self.flow_data = self.pre_process_data(data=get_flow_data(data_path[1], data_name),
                                                                norm_dim=1)  # self.flow_norm为归一化的基
 
     def __len__(self):  # 表示数据集的长度
@@ -128,7 +155,7 @@ class LoadData(Dataset):  # 这个就是把读入的数据处理成模型需要�
         max_data = np.max(data, norm_dim, keepdims=True)  # [N, T, D] , norm_dim=1, [N, 1, D], keepdims=True就保持了纬度一致
         min_data = np.min(data, norm_dim, keepdims=True)
 
-        return max_data, min_data   # 返回最大值和最小值
+        return max_data, min_data  # 返回最大值和最小值
 
     @staticmethod
     def normalize_data(max_data, min_data, data):  # 计算归一化的流量数据，用的是最大值最小值归一化法
@@ -165,14 +192,30 @@ class LoadData(Dataset):  # 这个就是把读入的数据处理成模型需要�
     def to_tensor(data):
         return torch.tensor(data, dtype=torch.float)
 
-if __name__ == '__main__':
-    test_data = LoadData(data_path=["adjacency_matrix_xian.csv", "Xian.npz"], num_nodes=64, divide_days=[47, 14],
-                          time_interval=1, history_length=1,
-                          train_mode="train")
 
-    print(len(test_data))
-    print(test_data[0]["graph"])
-    print(test_data[0]["graph"].shape)
+if __name__ == '__main__':
+
+    data_name = 'PEMS04'  # Xian、PEMS04
+
+    if data_name == 'Xian':
+        data_path = [f"adjacency_matrix_xian.csv", f"{data_name}.npz"]
+        time_interval = 1
+        history_length = 1
+        num_nodes = 64
+        divide_days = [47, 14]
+    elif data_name == 'PEMS04':
+        data_path = [f"../{data_name}/{data_name}.csv", f"../{data_name}/{data_name}.npz"]
+        time_interval = 5
+        history_length = 6
+        num_nodes = 307
+        divide_days = [45, 14]
+    data = LoadData(data_path=data_path, num_nodes=num_nodes, divide_days=divide_days,
+                    time_interval=time_interval, history_length=history_length,
+                    train_mode="test", data_name=data_name)
+
+    print(len(data))
+    # print(data[0]["graph"])
+    print(data[0]["graph"].shape)
     # print(test_data[0]["flow_y"])
-    # print(test_data[0]["flow_x"].size())
-    # print(test_data[0]["flow_y"].size())
+    print(data[0]["flow_x"].size())
+    print(data[0]["flow_y"].size())
