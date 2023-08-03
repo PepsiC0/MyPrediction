@@ -53,5 +53,5 @@ class LSTM(nn.Module):
         # output, _ = self.lstm(flow_x)
         # out = self.fc(output[:, -1, :])  # 只选择序列的最后一个时间步作为输出
         return out
-        # return out.view(flow_x.size(0), flow_x.size(1)).unsqueeze(2).unsqueeze(3)
+
 
