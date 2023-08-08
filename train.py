@@ -13,14 +13,15 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class ModelTrainer:
-    def __init__(self, model, data_name, model_name, num_epochs, criterion, optimizer):
+    def __init__(self, model, data_name, model_name, num_epochs, criterion, optimizer, data):
         self.model = model
         self.data_name = data_name
         self.model_name = model_name
         self.num_epochs = num_epochs
         self.criterion = criterion
         self.optimizer = optimizer
-
+        self.data = data
+        # print(len(data))
     def train(self, train_data):
 
         # 设置日志文件的路径和文件名
@@ -42,7 +43,10 @@ class ModelTrainer:
                 outputs = self.model(data)
 
                 # LSTM\GRU 和 GCN 不同
-                train_y = data['flow_y'].view(data['flow_y'].size(0) * data['flow_y'].size(1), -1)  # [4096,1]
+                # print(data['flow_x'].shape)  # [64, 307, 6, 1]
+                # train_y = data['flow_y'].view(data['flow_y'].size(0) * data['flow_y'].size(1), -1)  # [4096,1]
+                train_y = data['flow_y']  # [64, 307, 6, 1]
+                # print(train_y.shape)
                 # train_y = data['flow_y']  # [64,64,1,1]
                 # print(train_y.shape)
 
@@ -59,10 +63,10 @@ class ModelTrainer:
 
             end_time = time.time()  # 记录结束时间
             epoch_time = end_time - start_time  # 计算epoch所花费的时间
-
+            # print(epoch_loss)
             if (epoch + 1) % 1 == 0:
                 print(
-                    f'Epoch [{epoch + 1}/{self.num_epochs}], Loss: {1000 * epoch_loss / len(train_data)}, Time: {epoch_time:.2f} seconds')
+                    f'Epoch [{epoch + 1}/{self.num_epochs}], Loss: {epoch_loss / len(data):02.4f}, Time: {epoch_time:.2f} s')
 
         # 保存训练好的模型
         save_path = f'saved_models/{self.data_name}/{self.model_name}.pth'

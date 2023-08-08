@@ -10,16 +10,18 @@ from test import ModelTester
 from train import ModelTrainer
 from data.Xian.dataset import LoadData
 from torch.utils.data import DataLoader
+import warnings
+warnings.filterwarnings('ignore')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', type=str, default='PEMS04', help='Xian、PEMS04')
 parser.add_argument('--input_size', type=int, default=6, help='Xian--1、PEMS04--6')
-parser.add_argument('--hidden_size', type=int, default=64, help='')
+parser.add_argument('--hidden_size', type=int, default=6, help='')
 parser.add_argument('--num_layers', type=int, default=4, help='')
 parser.add_argument('--output_size', type=int, default=1, help='')
-parser.add_argument('--num_epochs', type=int, default=20, help='')
+parser.add_argument('--num_epochs', type=int, default=5, help='')
 parser.add_argument('--learning_rate', type=int, default=0.001, help='')
-parser.add_argument('--model', type=str, default='GCN', help='LSTM、GRU、GCN、Cheb、GAT')
+parser.add_argument('--model', type=str, default='GAT', help='LSTM、GRU、GCN、Cheb、GAT')
 args = parser.parse_args()
 
 
@@ -49,13 +51,14 @@ def main():
     # print(len(train_data))
     # print(train_data[0]["graph"])
     # print(train_data[0]["graph"].shape)
-    train_loader = DataLoader(train_data, batch_size=64, shuffle=True, num_workers=0)
+    train_loader = DataLoader(train_data, batch_size=64, shuffle=False, num_workers=0)
 
     test_data = LoadData(data_path=data_path, num_nodes=num_nodes, divide_days=divide_days,
                          time_interval=time_interval, history_length=history_length,
                          train_mode="test", data_name=args.data_name)
     # print(len(test_data))
     test_loader = DataLoader(test_data, batch_size=64, shuffle=False, num_workers=0)
+    # print(len(test_loader))
 
     # 创建模型实例
     if args.model == 'LSTM':
@@ -82,13 +85,11 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
     # 训练
-    trainer = ModelTrainer(model, args.data_name, model_name, args.num_epochs, criterion, optimizer)
+    trainer = ModelTrainer(model, args.data_name, model_name, args.num_epochs, criterion, optimizer, data=train_data)
     trainer.train(train_loader)
 
     # 测试
-    # test_data = test_data.to(device)
-    tester = ModelTester(model, criterion, model_name, args.data_name)
-    # 在测试集上进行测试
+    tester = ModelTester(model, criterion, model_name, args.data_name, data=test_data)
     tester.test(test_loader)
 
 

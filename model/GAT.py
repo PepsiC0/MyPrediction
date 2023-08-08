@@ -29,7 +29,7 @@ class GraphAttentionLayer(nn.Module):
         """
 
         h = self.W(inputs)  # [B, N, D]，一个线性层，就是第一步中公式的 W*h
-
+        # print(h.shape)
         # 下面这个就是，第i个节点和第j个节点之间的特征做了一个内积，表示它们特征之间的关联强度
         # 再用graph也就是邻接矩阵相乘，因为邻接矩阵用0-1表示，0就表示两个节点之间没有边相连
         # 那么最终结果中的0就表示节点之间没有边相连
@@ -78,8 +78,9 @@ class GATNet(nn.Module):
         self.subnet = GATSubNet(in_c, hid_c, out_c, n_heads)
 
     def forward(self, data):
-        graph = data["graph"].to(device)[0]  # [N, N]
-        flow = data["flow_x"].to(device)   # [B, N, T, C]
+        graph = data["graph"][0].to(device)  # [N, N]
+        flow = data["flow_x"]  # [B, N, T, C]
+        flow = flow.to(device)  # 将流量数据送入设备
 
         B, N = flow.size(0), flow.size(1)
         flow = flow.view(B, N, -1)  # [B, N, T * C]
@@ -92,9 +93,7 @@ class GATNet(nn.Module):
 
        """
 
-        # prediction = self.subnet(flow, graph).unsqueeze(2)  # [B, N, 1, C]，这个１加上就表示预测的是未来一个时刻
-        prediction = self.subnet(flow, graph)  # [B, N, 1, C]，这个１加上就表示预测的是未来一个时刻
-        prediction = prediction.view(prediction.size(0)*prediction.size(1), -1)
+        prediction = self.subnet(flow, graph).unsqueeze(2)  # [B, N, 1, C]，这个１加上就表示预测的是未来一个时刻
 
         print(prediction.shape)
         return prediction

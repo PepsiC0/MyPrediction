@@ -211,7 +211,7 @@ if __name__ == '__main__':
         divide_days = [45, 14]
     data = LoadData(data_path=data_path, num_nodes=num_nodes, divide_days=divide_days,
                     time_interval=time_interval, history_length=history_length,
-                    train_mode="test", data_name=data_name)
+                    train_mode="train", data_name=data_name)
 
     print(len(data))
     # print(data[0]["graph"])

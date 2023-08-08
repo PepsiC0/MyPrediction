@@ -31,11 +31,11 @@ class GRU(nn.Module):
         flow_x = flow_x.view(flow_x.size(0), flow_x.size(1), -1)
         x, _ = self.gru(flow_x)
         # print(x.shape)
-        s, b, h = x.shape
-        x = x.reshape(s * b, h)  # 转换成线性层的输入格式
+        # s, b, h = x.shape
+        # x = x.reshape(s * b, h)  # 转换成线性层的输入格式
         # x = x.reshape(s, b, -1)
         out = self.fc(x)
-
+        out = out.unsqueeze(2)
         return out
 
 
