@@ -1,11 +1,4 @@
 import torch
-import torch.nn as nn
-import numpy as np
-import os
-import logging
-from data.Xian.dataset import LoadData
-from utils.utils import Evaluation
-from torch.utils.data import DataLoader
 import time
 from torch.utils.tensorboard import SummaryWriter
 
@@ -22,6 +15,7 @@ class ModelTrainer:
         self.optimizer = optimizer
         self.data = data
         # print(len(data))
+
     def train(self, train_data):
 
         # 设置日志文件的路径和文件名
@@ -38,19 +32,9 @@ class ModelTrainer:
             for data in train_data:  # ["graph": [B, N, N] , "flow_x": [B, N, H, D], "flow_y": [B, N, 1, D]],一次把一个batch的训练数据取出来
                 self.model.zero_grad()
                 count += 1
-
-                # outputs = model(data['flow_x'].to(device))
                 outputs = self.model(data)
-                # print("outputs:", outputs.size())
-                # LSTM\GRU 和 GCN 不同
-                # print(data['flow_x'].shape)  # [64, 307, 6, 1]
-                # train_y = data['flow_y'].view(data['flow_y'].size(0) * data['flow_y'].size(1), -1)  # [4096,1]
                 train_y = data['flow_y']  # [64, 307, 6, 1]
-                # train_y = train_y.permute(0, 2, 1, 3)  # [64, 6, 307, 1]
-                # print("train_y:", train_y.shape)
-                # train_y = data['flow_y']  # [64,64,1,1]
-                # print(train_y.shape)
-
+                print(train_y.size())
                 # loss = criterion(outputs, data['flow_y'].to(device))
                 loss = self.criterion(outputs, train_y.to(device))
                 epoch_loss += loss.item()  # 这里是把一个epoch的损失都加起来，最后再除训练数据长度，用平均loss来表示

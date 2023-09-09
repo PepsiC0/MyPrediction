@@ -16,13 +16,13 @@ warnings.filterwarnings('ignore')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_name', type=str, default='PEMS04', help='Xian、PEMS04')
-parser.add_argument('--input_size', type=int, default=6, help='Xian--1、PEMS04--6')
+parser.add_argument('--input_size', type=int, default=12, help='Xian--1、PEMS04--6')
 parser.add_argument('--hidden_size', type=int, default=6, help='')
 parser.add_argument('--num_layers', type=int, default=4, help='')
-parser.add_argument('--output_size', type=int, default=1, help='')
-parser.add_argument('--num_epochs', type=int, default=20, help='')
+parser.add_argument('--output_size', type=int, default=6, help='')
+parser.add_argument('--num_epochs', type=int, default=10, help='')
 parser.add_argument('--learning_rate', type=int, default=0.001, help='')
-parser.add_argument('--model', type=str, default='ASTGCN', help='LSTM、GRU、GCN、Cheb、GAT')
+parser.add_argument('--model', type=str, default='GRU', help='LSTM、GRU、GCN、Cheb、GAT')
 args = parser.parse_args()
 
 
@@ -42,7 +42,7 @@ def main():
     elif args.data_name == 'PEMS04':
         data_path = [f"./data/{args.data_name}/{args.data_name}.csv", f"./data/{args.data_name}/{args.data_name}.npz"]
         time_interval = 5
-        history_length = 6
+        history_length = 12
         num_nodes = 307
         divide_days = [45, 14]
 

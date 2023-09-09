@@ -249,6 +249,7 @@ class ASTGCN(torch.nn.Module):
 
         self.final_conv = torch.nn.Conv2d(
             in_channels=c_in,
+            # out_channels=c_out,
             out_channels=1,
             kernel_size=(1, num_time_filter)
         )

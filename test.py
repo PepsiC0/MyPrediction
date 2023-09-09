@@ -1,12 +1,10 @@
 import h5py
 import torch
-import torch.nn as nn
 import numpy as np
 import os
 import logging
 from data.Xian.dataset import LoadData
 from utils.utils import Evaluation
-from torch.utils.data import DataLoader
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -29,38 +27,12 @@ class ModelTester:
             count = 0
             for data in test_data:
                 predicted = self.model(data).to(device)
-                # print(predicted.shape)
-                # print(data['flow_y'].shape)
-                # test_y = data['flow_y'].view(data['flow_y'].size(0) * data['flow_y'].size(1), -1)
                 test_y = data['flow_y']
-                # test_y = test_y.permute(0, 2, 1, 3)
                 loss = self.criterion(predicted, test_y.to(device))  # 使用MSE计算loss
-                # print(predicted.shape)
-                # print(data["flow_y"].shape)
                 total_loss += loss.item()  # 所有的batch的loss累加
                 print(total_loss)
                 count += 1
-                # 将预测结果转换为张量
-                # predicted = predicted.to(device)
-                # test_y = data['flow_y'].squeeze().view(-1)
-                # test_y = data['flow_y'].squeeze().view(-1)
-                # 将预测结果转换为NumPy数组
-                # predicted = predicted.view(-1).cpu().detach().numpy()
-                # predicted = predicted.cpu().detach().numpy()
-                # print(predicted.shape)
-                # test_y = test_y.cpu().numpy()
-                # print(test_y.shape)
 
-                # MAE = np.mean(np.abs(test_y - predicted)).item()
-                # RMSE = np.sqrt(np.mean((test_y - predicted) ** 2)).item()
-                # epsilon = 1e-8  # 定义一个很小的值
-                # MAPE = np.mean(np.abs((test_y - predicted) / test_y + epsilon)) * 100
-                # # print(np.abs((test_y - predicted) / test_y)
-                # print(f'MAE: {mae}, RMSE: {rmse}, MAPE: {mape}')
-
-                # 下面实际上是把预测值和目标值的batch放到第二维的时间维度，这是因为在测试数据的时候对样本没有shuffle，
-                # 所以每一个batch取出来的数据就是按时间顺序来的，因此放到第二维来表示时间是合理的.
-                # print(data["flow_y"].shape)
                 predicted = predicted.transpose(0, 2).squeeze(0)  # [1, N, B(T), D] -> [N, B(T), D] -> [N, T, D]
                 test_y = test_y.transpose(0, 2).squeeze(0)  # [1, N, B(T), D] -> [N, B(T), D] -> [N, T, D]
                 predicted = predicted.cpu().detach().numpy()

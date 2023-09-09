@@ -206,7 +206,7 @@ if __name__ == '__main__':
     elif data_name == 'PEMS04':
         data_path = [f"../{data_name}/{data_name}.csv", f"../{data_name}/{data_name}.npz"]
         time_interval = 5
-        history_length = 6
+        history_length = 12
         num_nodes = 307
         divide_days = [45, 14]
     data = LoadData(data_path=data_path, num_nodes=num_nodes, divide_days=divide_days,

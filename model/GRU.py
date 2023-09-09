@@ -29,6 +29,7 @@ class GRU(nn.Module):
         # train_loader
         flow_x = x["flow_x"].to(device)  # [B, N, H, D]  流量数据
         flow_x = flow_x.view(flow_x.size(0), flow_x.size(1), -1)
+        # print(flow_x.size())
         x, _ = self.gru(flow_x)
         # print(x.shape)
         # s, b, h = x.shape
@@ -36,6 +37,7 @@ class GRU(nn.Module):
         # x = x.reshape(s, b, -1)
         out = self.fc(x)
         out = out.unsqueeze(2)
+        # print(out.size())
         return out
 
 
