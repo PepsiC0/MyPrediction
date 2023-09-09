@@ -33,11 +33,12 @@ class ModelTester:
                 # print(data['flow_y'].shape)
                 # test_y = data['flow_y'].view(data['flow_y'].size(0) * data['flow_y'].size(1), -1)
                 test_y = data['flow_y']
-
+                # test_y = test_y.permute(0, 2, 1, 3)
                 loss = self.criterion(predicted, test_y.to(device))  # 使用MSE计算loss
                 # print(predicted.shape)
                 # print(data["flow_y"].shape)
                 total_loss += loss.item()  # 所有的batch的loss累加
+                print(total_loss)
                 count += 1
                 # 将预测结果转换为张量
                 # predicted = predicted.to(device)

@@ -31,7 +31,7 @@ class LSTM(nn.Module):
         # x = x.reshape(s, b, -1)
         out = self.fc(x)
         out = out.unsqueeze(2)
-        print(out.shape)
+        # print(out.shape)
         return out
 
 

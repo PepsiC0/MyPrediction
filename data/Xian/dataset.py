@@ -195,7 +195,7 @@ class LoadData(Dataset):  # 这个就是把读入的数据处理成模型需要�
 
 if __name__ == '__main__':
 
-    data_name = 'PEMS04'  # Xian、PEMS04
+    data_name = 'Xian'  # Xian、PEMS04
 
     if data_name == 'Xian':
         data_path = [f"adjacency_matrix_xian.csv", f"{data_name}.npz"]

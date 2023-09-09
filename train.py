@@ -41,12 +41,13 @@ class ModelTrainer:
 
                 # outputs = model(data['flow_x'].to(device))
                 outputs = self.model(data)
-
+                # print("outputs:", outputs.size())
                 # LSTM\GRU 和 GCN 不同
                 # print(data['flow_x'].shape)  # [64, 307, 6, 1]
                 # train_y = data['flow_y'].view(data['flow_y'].size(0) * data['flow_y'].size(1), -1)  # [4096,1]
                 train_y = data['flow_y']  # [64, 307, 6, 1]
-                # print(train_y.shape)
+                # train_y = train_y.permute(0, 2, 1, 3)  # [64, 6, 307, 1]
+                # print("train_y:", train_y.shape)
                 # train_y = data['flow_y']  # [64,64,1,1]
                 # print(train_y.shape)
 

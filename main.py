@@ -6,6 +6,7 @@ from model.GRU import GRU
 from model.GCN import GCN
 from model.Chebnet import ChebNet
 from model.GAT import GATNet
+from model.ASTGCN import ASTGCN
 from test import ModelTester
 from train import ModelTrainer
 from data.Xian.dataset import LoadData
@@ -19,9 +20,9 @@ parser.add_argument('--input_size', type=int, default=6, help='Xian--1、PEMS04-
 parser.add_argument('--hidden_size', type=int, default=6, help='')
 parser.add_argument('--num_layers', type=int, default=4, help='')
 parser.add_argument('--output_size', type=int, default=1, help='')
-parser.add_argument('--num_epochs', type=int, default=5, help='')
+parser.add_argument('--num_epochs', type=int, default=20, help='')
 parser.add_argument('--learning_rate', type=int, default=0.001, help='')
-parser.add_argument('--model', type=str, default='GAT', help='LSTM、GRU、GCN、Cheb、GAT')
+parser.add_argument('--model', type=str, default='ASTGCN', help='LSTM、GRU、GCN、Cheb、GAT')
 args = parser.parse_args()
 
 
@@ -77,6 +78,9 @@ def main():
     elif args.model == 'GAT':
         model_name = args.model
         model = GATNet(args.input_size, args.hidden_size, args.output_size, n_heads=2).to(device)
+    elif args.model == 'ASTGCN':
+        model_name = args.model
+        model = ASTGCN(num_block=1, c_in=6, c_out=6, f_in=1, num_cheb_filter=64, num_time_filter=64, kernel_size=3, stride=1, padding=0, K=2, adj_mx_path='./data/PEMS04/adj_mx.npy', device='cuda:0').to(device)
 
     print('当前模型：' + model_name)
 

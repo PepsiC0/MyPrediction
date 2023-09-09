@@ -18,6 +18,7 @@ class GCN(nn.Module):  # GCN模型，向空域的第一个图卷积
         self.act = nn.ReLU()  # 定义激活函数
 
     def forward(self, data):
+
         graph_data = data["graph"].to(device)[0]
         # print(graph_data.shape)# [N, N] 邻接矩阵，并且将数据送入设备
         graph_data = GCN.process_graph(graph_data)  # 变换邻接矩阵 \hat A = D_{-1/2}*A*D_{-1/2}
@@ -39,6 +40,7 @@ class GCN(nn.Module):  # GCN模型，向空域的第一个图卷积
         # output_2 = output_2.view(output_2.size(0)*output_2.size(1), -1)  # [4096,1]
         output_2 = output_2.unsqueeze(2)
         # print(output_2.shape)
+
         return output_2  # 第２维的维度扩张
 
     @staticmethod

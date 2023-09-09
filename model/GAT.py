@@ -43,7 +43,7 @@ class GraphAttentionLayer(nn.Module):
         return torch.bmm(attention, h) + self.b  # [B, N, N] * [B, N, D]，，这个是第三步的，利用注意力系数对邻域节点进行有区别的信息聚合
 
 
-class GATSubNet(nn.Module): # 这个是多头注意力机制
+class GATSubNet(nn.Module):  # 这个是多头注意力机制
     def __init__(self, in_c, hid_c, out_c, n_heads):
         super(GATSubNet, self).__init__()
 
@@ -55,7 +55,7 @@ class GATSubNet(nn.Module): # 这个是多头注意力机制
         self.out_att = GraphAttentionLayer(hid_c * n_heads, out_c)
 
         self.act = nn.LeakyReLU()
-
+        # self.act = nn.ReLU()
 
     def forward(self, inputs, graph):
         """
@@ -95,5 +95,18 @@ class GATNet(nn.Module):
 
         prediction = self.subnet(flow, graph).unsqueeze(2)  # [B, N, 1, C]，这个１加上就表示预测的是未来一个时刻
 
-        print(prediction.shape)
+        # print(prediction.shape)
         return prediction
+
+
+if __name__ == '__main__':  # 测试模型是否合适
+    x = torch.randn(32, 278, 6, 2)  # [B, N, T, C]
+    graph = torch.randn(32, 278, 278)  # [N, N]
+    data = {"flow_x": x, "graph": graph}
+
+    device = torch.device("cpu")
+
+    net = GATNet(in_c=6 * 2, hid_c=6, out_c=2, n_heads=2)
+
+    y = net(data)
+    print(y.size())
