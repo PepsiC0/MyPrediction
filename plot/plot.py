@@ -11,13 +11,18 @@ def plot(data_name, model_name, nodes_id, time_se):
     model_name = model_name
 
     predicted = np.load(f'{data_name}/{model_name}/predicted.npy')
+    print(predicted.shape)
     predicted = predicted[:][:, :, 0]
+    print(predicted.shape)
+
     test_y = np.load(f'{data_name}/{model_name}/test.npy')
+    print(test_y.shape)
+
     test_y = test_y[:][:, :, 0]
-    # print(test_y.shape)
+    print(test_y.shape)
 
     plot_prediction = predicted[nodes_id][time_se[0]: time_se[1]]  # [T1]，将指定节点的，指定时间的数据拿出来
-    # print(plot_prediction.shape)
+    print(plot_prediction.shape)
     plot_target = test_y[nodes_id][time_se[0]: time_se[1]]  # [T1]，同上
 
     # a = test_y[306][time_se[0]: time_se[1]]

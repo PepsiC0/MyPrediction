@@ -22,7 +22,8 @@ class ModelTester:
         with torch.no_grad():
             MAE, RMSE, MAPE = [], [], []  # 定义三种指标的列表
             total_loss = 0.0
-            Target = np.zeros([307, 1, 1])  # [N, T, D],T=1 ＃ 目标数据的维度，用０填充
+            Target = np.zeros([64, 1, 1])  # [N, T, D],T=1 ＃ 目标数据的维度，用０填充 --Xian
+            # Target = np.zeros([307, 1, 1])  # [N, T, D],T=1 ＃ 目标数据的维度，用０填充 -- PEMS04
             Predict = np.zeros_like(Target)  # [N, T, D],T=1 # 预测数据的维度
             count = 0
             for data in test_data:

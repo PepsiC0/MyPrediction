@@ -33,8 +33,10 @@ def visualize_result(data_name, model_name, nodes_id, time_se):
               np.max(np.array([np.max(plot_prediction), np.max(plot_target)]))])
     # plt.title('GAT')
     # plt.savefig("h5py_prediction.png")
+    plt.savefig(f'{data_name}/{model_name}/{nodes_id}_predicted.png')
     plt.show()
 
 if __name__ == '__main__':
 
-    visualize_result(data_name='PEMS04', model_name='GAT', nodes_id=120, time_se=[0, 288])
+    # visualize_result(data_name='Xian', model_name='GRU', nodes_id=120, time_se=[0, 288])  # PEMS04 节点数：307；时间288为一天
+    visualize_result(data_name='Xian', model_name='GRU', nodes_id=30, time_se=[0, 24])  # Xian 节点数：64；时间24为一天

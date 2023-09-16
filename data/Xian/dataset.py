@@ -206,7 +206,7 @@ if __name__ == '__main__':
     elif data_name == 'PEMS04':
         data_path = [f"../{data_name}/{data_name}.csv", f"../{data_name}/{data_name}.npz"]
         time_interval = 5
-        history_length = 12
+        history_length = 6
         num_nodes = 307
         divide_days = [45, 14]
     data = LoadData(data_path=data_path, num_nodes=num_nodes, divide_days=divide_days,
@@ -214,8 +214,9 @@ if __name__ == '__main__':
                     train_mode="train", data_name=data_name)
 
     print(len(data))
+    print(data[20])
     # print(data[0]["graph"])
-    print(data[0]["graph"].shape)
-    # print(test_data[0]["flow_y"])
-    print(data[0]["flow_x"].size())
-    print(data[0]["flow_y"].size())
+    # print(data[0]["graph"].shape)
+    # # print(test_data[0]["flow_y"])
+    # print(data[0]["flow_x"].size())
+    # print(data[0]["flow_y"].size())
